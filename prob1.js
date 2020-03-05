@@ -2,7 +2,6 @@ const inquirer = require('inquirer');
 
 module.exports = {
     run: () => {
-        console.log(`Shortest path problem`);
         inquirer.prompt([
             {
                 type: "list",
@@ -18,112 +17,71 @@ module.exports = {
             }
         ]).then((answers) => {
             const points = answers;
-            calculate(points.pointA, points.pointB);
+            dijkstra(graph, points.pointA, points.pointB);
         });
     }
 }
 
-const routes = [
-    {
-        from: "Tuguegarao",
-        to: "Iguig",
-        distance: 24
-    },
-    {
-        from: "Tuguegarao",
-        to: "Amulung",
-        distance: 71
-    },
-    {
-        from: "Iguig",
-        to: "Aparri",
-        distance: 103
-    },
-    {
-        from: "Iguig",
-        to: "Penablanca",
-        distance: 59
-    },
-    {
-        from: "Enrile",
-        to: "Piat",
-        distance: 141
-    },
-    {
-        from: "Enrile",
-        to: "Penablanca",
-        distance: 65
-    },
-    {
-        from: "Enrile",
-        to: "Amulung",
-        distance: 101
-    },
-    {
-        from: "Piat",
-        to: "Amulung",
-        distance: 169
-    },
-    {
-        from: "Amulung",
-        to: "Penablanca",
-        distance: 134
-    }
-];
+const graph = {
+    'Tuguegarao':{'Iguig':24, 'Amulung':71},
+    'Iguig':{'Aparri':103, 'Penablanca':59, 'Tuguegarao':24},
+    'Amulung':{'Penablanca':134, 'Tuguegarao': 71, 'Enrile':101},
+    'Penablanca':{'Iguig':59, 'Amulung':134, 'Enrile':65},
+    'Aparri':{'Iguig':103},
+    'Enrile':{'Piat':141, 'Penablanca':65, 'Amulung':101},
+    'Piat':{'Amulung':169, 'Enrile':141}
+    };
 
-let foundRoutes = [];
-let unoptimizedRoutes = [];
-let optimizedRoutes = [];
-let start;
-let finish;
+function dijkstra(graph, start, end) {
+    shortest_distance = {};
+    track_predecessor = {};
+    unvisitedNodes = graph;
+    INFINITY = 999999;
+    track_path = []
 
-function calculate(a, b) {
-    // const routes = this.routes;
-    console.table(routes);
+    for(var node in unvisitedNodes) {
+        shortest_distance[node] = INFINITY;
+    };
 
-    start = a;
-    finish = b;
-    console.log(`Calculating route from ${start} to ${finish}...`);
+    shortest_distance[start] = 0;
 
-    getUnoptimizedRoute(start);
-}
+    while(Object.keys(unvisitedNodes).length > 0) {
+        min_distance_node = null;
 
-function getUnoptimizedRoute(a, iteration = 0) {
-    console.log(`Iteration ${iteration}...`);
+        for(var node in unvisitedNodes) {
+            if(min_distance_node === null) {
+                min_distance_node = node;
+            }
+            else if(shortest_distance[node] < shortest_distance[min_distance_node]) {
+                min_distance_node = node;
+            }
+        };
 
-    let foundRoute = [];
-    
-    for (let index = 0; index < routes.length; index++) {
-        const route = routes[index];
+        path_options = graph[min_distance_node];
 
-        console.log(`Checking ${route.from} - ${route.to}...`);
-        if(route.from == a || route.to == a) {
-            foundRoute.push(route);
-        }
+        for(var child_node in path_options) {
+            if(path_options[child_node] + shortest_distance[min_distance_node] < shortest_distance[child_node]) {
+                shortest_distance[child_node] = path_options[child_node] + shortest_distance[min_distance_node];
+                track_predecessor[child_node] = min_distance_node;
+            }
+        };
 
-        if((route.from == start || route.to == start) && (route.from == finish || route.to == finish)) {
-            console.log(`Direct route found!`);
-            optimizedRoutes.push(route);
-            finalize();
-        }
+        delete unvisitedNodes[min_distance_node];
     }
 
-    foundRoute.sort((a, b) => {
-        return a.distance - b.distance;
-    });
+    currentNode = end;
+        
+    while(currentNode !== start) {
+        track_path.push(currentNode);
+        currentNode = track_predecessor[currentNode];
+        
+    }
 
-    foundRoutes.push(foundRoute);
+    track_path.push(start);
 
-    unoptimizedRoutes.push(foundRoutes);
-
-    console.log(`Route so far...`);
-    console.dir(unoptimizedRoutes, {depth: null});
-
-    
-}
-
-function finalize() {
-    console.log(`Computed route`);
-    console.dir(optimizedRoutes);
-    process.exit(1);
+    if(shortest_distance[end] != INFINITY) {
+        console.log('Shortest routing and distance: ');
+        var track_path = track_path.reverse().toString().replace(/,/g, '-');
+        console.log(track_path + ' ' + shortest_distance[end] + ' miles');
+    }
 }
