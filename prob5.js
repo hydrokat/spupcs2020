@@ -41,4 +41,13 @@ function calculate(pancakes) {
     console.table(pancakesObj);
     console.log(`Highest Eaters`);
     console.table(highestEaters);
+
+    let finalText = ``
+    highestEaters.forEach((he, i) => {
+        finalText += `Person #${he.Person}, `;
+    });
+    finalText += `ate the most pancakes at ${highestEaters[0].value}`;
+
+    console.log(finalText);
+    
 }

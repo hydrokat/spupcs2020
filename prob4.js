@@ -22,11 +22,12 @@ function calculate(year) {
     if(isLeapYear(year)) {
         for (let index = 0; index <= 5; index++) {
             let nextYear = year;
-            nextYear = year + (index * 4);
+            nextYear = year + ((index + 1) * 4);
 
             leapYears.push(nextYear);
         }
 
+        console.log(`${year} is a leap year.`);
         console.log(`Next 5 leap years: ${leapYears}`);
     } else {
         console.log(`${year} is not a leap year.`);
